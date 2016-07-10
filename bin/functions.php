@@ -65,21 +65,32 @@ function listDatabase($schema_name) {
 #										T A B L E   F U N C T I O N S
 # -------------------------------------------------------------------------------------------------------
 
-function createTable() {
+function createTable($table_name, $database_name, $schema_name) {
 	
 	
 	
 	
 }
 
-function deleteTable() {
+function deleteTable($table_name, $database_name, $schema_name) {
 	
 	
 	
 	
 }
 
-function addRecord() {
+function listContentsTable($table_name, $database_name, $schema_name) {
+	
+	
+	
+}
+
+# -------------------------------------------------------------------------------------------------------
+#										R E C O R D   F U N C T I O N S
+# -------------------------------------------------------------------------------------------------------
+
+
+function addRecord($record_data, $table_name, $database_name, $schema_name) {
 	
 	
 	
@@ -100,6 +111,8 @@ function deleteRecord() {
 	
 	
 }
+
+function list
 
 
 
