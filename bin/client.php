@@ -23,7 +23,7 @@
 
 	storeQuery($query);
 	
-	showQueryHistory();
+	#showQueryHistory();
 	
 	parseQuery($query);
 	

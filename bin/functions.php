@@ -53,43 +53,71 @@ function parseQuery($query) {
 	
 	# Create Commands
 	if ($commands[0] == "create") {
-		
-		if ($elements > 2) {
-			# Create Schema
-			if ($commands[1] == "schema") {
-				if ($elements == 3) {
-					$status = createSchema($commands[2]);
-					echo "<p>Create Schema: " . $status;
-				} else {
-					echo "<p>Invalid: No schema name specified.";
-				}
-			
-			}
-			
-		} else {
-			echo "<p>Invalid: Specify schema, database or table.";
-		}
+		create($query);
 
 	} elseif ($commands[0] == "delete") {
-		
-		if ($elements > 2) {
-			# Delete Schema
-			if ($commands[1] == "schema") {
-				if ($elements == 3) {
-					$status = deleteSchema($commands[2]);
-					echo "<p>Delete Schema: " . $status;
-				} else {
-					echo "<p>Invalid: No schema name specified.";
-				}
-			
-			}
-			
-		} else {
-			echo "<p>Invalid: Specify schema, database or table.";
-		}
+		delete($query);
+
 	} else {
 		echo "<p>Invalid: No command found.";
 	}
+	
+}
+
+function create($query) {
+	
+	$commands = explode(" ", $query);
+	$elements = count($commands);
+	
+	if ($elements >= 2) {
+		# Create Schema | create schema <schema_name>
+		if ($commands[1] == "schema") {
+			if ($elements == 3) {
+				$status = createSchema($commands[2]);
+				echo "<p>Create Schema: " . $status;
+			} else {
+				echo "<p>Invalid: No schema name specified.";
+			}
+		}
+		
+		# Create Database | create database	<db_name> in <schema_name>
+		if ($commands[1] == "database") {
+			if ($elements == 5 && $commands[3] == "in") {
+				$status = createDatabase($commands[2], $commands[4]);
+				echo "<p>Create Database: " . $status;
+			} else {
+				echo "<p>Invalid: Missing parameters, or command malformed.";
+			}
+		}
+		
+		
+	} else {
+		echo "<p>Invalid: Specify schema, database or table.";
+	}
+
+}
+
+function delete($query) {
+
+	$commands = explode(" ", $query);
+	$elements = count($commands);
+
+	if ($elements >= 2) {
+		# Delete Schema
+		if ($commands[1] == "schema") {
+			if ($elements == 3) {
+				$status = deleteSchema($commands[2]);
+				echo "<p>Delete Schema: " . $status;
+			} else {
+				echo "<p>Invalid: No schema name specified.";
+			}
+		
+		}
+		
+	} else {
+		echo "<p>Invalid: Specify schema, database or table.";
+	}
+	
 	
 }
 
@@ -209,8 +237,34 @@ function deleteSchema($schema_name) {
 
 function createDatabase($database_name, $schema_name) {
 	
+	$schema_path = "../db/" . $schema_name;
+	$status = "";
 	
+	# Check database name is valid
+	$database_name_characters = str_split($database_name);
+	foreach ($database_name_characters as $character) {
+		if (ord($character) >= 97 && ord($character) <= 122) {
+			# Do nothing; character is valid between a-z
+		} else {
+			$status = "Only alpha characters between a-z accepted.<br/>";
+		}
+	}
 	
+	if ($status == "" && file_exists($schema_path)) {
+		# If so, create database
+		$database_path = $schema_path . "/" . $database_name;
+		mkdir($database_path);
+
+		# Check database exists
+		if (file_exists($database_path)) {
+			$status = "Database '" . $database_name . "' created in schema '" . $schema_name . "'.<br/>";
+		} else {
+			$status = "ERROR: Database '" . $database_name . "' not created.<br/>";
+		}		
+
+	}
+	
+	return $status;
 	
 }
 

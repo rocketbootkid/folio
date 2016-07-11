@@ -1,5 +1,5 @@
-delete schema a
-delete schema docroot
-delete schema ../db/test
-delete schema ../db/test
-delete schema b
+create database charlie richard
+create database charlie inside richard
+create database charlie
+create database charlie
+create database beta in richard
