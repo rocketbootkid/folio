@@ -4,7 +4,7 @@ $databases_root = "../db";
 $query_history_length = 5;
 
 # -------------------------------------------------------------------------------------------------------
-#											Q U E R Y   F U N C T I O N S
+#											C O M M A N D   F U N C T I O N S
 # -------------------------------------------------------------------------------------------------------
 
 function storeQuery($query) {
@@ -76,7 +76,7 @@ function create($query) {
 				$status = createSchema($commands[2]);
 				echo "<p>Create Schema: " . $status;
 			} else {
-				echo "<p>Invalid: No schema name specified.";
+				echo "<p>Create Schema: ERROR: Missing parameters, or command malformed.";
 			}
 		}
 		
@@ -86,7 +86,7 @@ function create($query) {
 				$status = createDatabase($commands[2], $commands[4]);
 				echo "<p>Create Database: " . $status;
 			} else {
-				echo "<p>Invalid: Missing parameters, or command malformed.";
+				echo "<p>Create Database: ERROR: Missing parameters, or command malformed.";
 			}
 		}
 		
@@ -103,15 +103,25 @@ function delete($query) {
 	$elements = count($commands);
 
 	if ($elements >= 2) {
-		# Delete Schema
+		# Delete Schema | delete schema <schema_name>
 		if ($commands[1] == "schema") {
 			if ($elements == 3) {
 				$status = deleteSchema($commands[2]);
 				echo "<p>Delete Schema: " . $status;
 			} else {
-				echo "<p>Invalid: No schema name specified.";
+				echo "<p>Delete Schema: ERROR: Missing parameters, or command malformed.";
 			}
-		
+		}
+
+		# Delete Database | delete database <database_name> from <schema_name>
+		if ($commands[1] == "database") {
+			if ($elements == 5 && $commands[3] == "from") {
+				$status = deleteDatabase($commands[2], $commands[4]);
+				echo "<p>Delete Database: " . $status;
+			} else {
+				echo "<p>Delete Database: ERROR: Missing parameters, or command malformed.";
+			}
+			
 		}
 		
 	} else {
@@ -131,16 +141,28 @@ function displayStructure() {
 	$schemas = scandir($GLOBALS['databases_root']);
 	$folders = count($schemas);
 	
-	echo "<p><b>Schemas</b><P>";
+	echo "<table cellspacing=1 cellpadding=3 border=1>";
+	echo "<tr><td><b>Schema<td><b>Databases</tr>";
 	
 	for ($f = 3; $f < $folders; $f++) {
-		echo $schemas[$f] . "<br/>";
+		echo "<tr><td valign=top>" . $schemas[$f] . "<td valign=top>";
 	
 		# List of databases
+		$schema_path = $GLOBALS['databases_root'] . "/" . $schemas[$f];
+		$databases = scandir($schema_path);
+		$db_count = count($databases);
 		
-			# List of tables
+		for ($d = 2; $d < $db_count; $d++) {
+				echo $databases[$d] . "<br/>";
+		}
+	
+		# List of tables
+			
+		echo "</tr>";
 	
 	}
+	
+	echo "<table>";
 	
 }
 
@@ -270,8 +292,31 @@ function createDatabase($database_name, $schema_name) {
 
 function deleteDatabase($database_name, $schema_name) {
 	
+	$database_path = "../db/" . $schema_name . "/" . $database_name;
+	$status = "";
 	
+	# Check for only ASCII alphanumerics
+	$database_name_characters = str_split($database_name);
+	foreach ($database_name_characters as $character) {
+		if (ord($character) >= 97 && ord($character) <= 122) {
+			# Do nothing; character is valid between a-z
+		} else {
+			$status = "Only alpha characters between a-z accepted.<br/>";
+		}
+	}
 	
+	if ($status == "") { # Characters in schema name are fine
+	
+		if (file_exists($database_path)) {
+			rmdir($database_path);		
+			$status = "Database deleted.<br/>";
+		} else {
+			$status = "ERROR: Database does not exist.<br/>";
+		}
+
+	}
+		
+	return $status;	
 	
 }
 

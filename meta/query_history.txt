@@ -1,5 +1,5 @@
-create database charlie richard
-create database charlie inside richard
-create database charlie
-create database charlie
+create database alpha in test
+create database gamma in richard
 create database beta in richard
+create database alpha in richard
+delete database alpha from richard
