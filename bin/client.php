@@ -19,19 +19,32 @@
 
 	include 'functions.php';
 
-	$query = $_POST['query'];
+	if (isset($_POST['query'])) {
+		$query = $_POST['query'];
+			
+		storeQuery($query);
+		
+		#showQueryHistory();
+		
+		parseQuery($query);
+		
+	}
 
-	storeQuery($query);
-	
-	#showQueryHistory();
-	
-	parseQuery($query);
 	
 	echo "<hr/>";
 	
-	displayStructure();
+	if (isset($_GET['mode'])) {
+		$mode = $_GET['mode'];
+	} else {
+		$mode = "";
+	}
+	displayStructure($mode);
 
 ?>
+
+<hr>
+
+<p><a href='datagen/datagen.php'>Generate Data</a>
 
 </body>
 

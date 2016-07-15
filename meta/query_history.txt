@@ -1,5 +1,5 @@
-create database alpha in test
-create database gamma in richard
-create database beta in richard
-create database alpha in richard
-delete database alpha from richard
+create table spoon in richard.beta
+create table hammock in richard.gamma
+view all in richard.alpha
+create schema sfwfdfs
+create schema blah
