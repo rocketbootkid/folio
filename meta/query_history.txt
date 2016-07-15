@@ -1,5 +1,5 @@
+delete schema sfwfdfs
+delete schema mushroom
+create table hamster in richard.delta
+create table hamster in richard.delta
 create table spoon in richard.beta
-create table hammock in richard.gamma
-view all in richard.alpha
-create schema sfwfdfs
-create schema blah

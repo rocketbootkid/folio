@@ -33,6 +33,18 @@
 	
 	echo "<hr/>";
 	
+	# Handle Create commands
+	if (isset($_POST['create_schema_command'])) {
+		createSchema($_POST['create_schema_command']);
+	}
+	if (isset($_POST['create_database_command'])) {
+		createDatabase($_POST['create_database_command'], $_POST['schema_name']);
+	}
+	if (isset($_POST['create_table_command'])) {
+		createTable($_POST['create_table_command'], $_POST['schema_name'] . "." . $_POST['database_name']);
+	}	
+	
+	# Display current structure level
 	if (isset($_GET['mode'])) {
 		$mode = $_GET['mode'];
 	} else {

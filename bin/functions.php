@@ -187,6 +187,14 @@ function displaySchemas() {
 		$text = "There are no schemas available. Create one using: create schema [schema_name]";
 	}
 	
+	# Provide form for creating a new schema
+	
+	$text = $text . "<p><strong>Create Schema</strong><P>";
+	$text = $text . "<form id='create_schema' method='post' action='client.php'>
+				<input id='create' type='text' name='create_schema_command' size='30'></input>
+				<input name='button' type='submit' value='Create'/> 
+			</form>";
+	
 	return $text;
 	
 }
@@ -210,6 +218,13 @@ function displayDatabases($schema_name) {
 	} else {
 		$text = "There are no databases in this schema. Create using: create database [database_name] in [schema_name]";
 	}
+	
+	$text = $text . "<p><strong>Create Database</strong><P>";
+	$text = $text . "<form id='create_database' method='post' action='client.php'>
+				<input id='database_name' type='text' name='create_database_command' size='30'></input>
+				<input type='hidden' name='schema_name' value='" . $schema_name . "'></input>
+				<input name='button' type='submit' value='Create'/> 
+			</form>";
 	
 	$text = $text . "<p><a href='client.php?mode='>Back</a>";
 	
@@ -235,7 +250,10 @@ function displayTables($database_schema_name) {
 			$table_name = str_replace(".txt", "", $tables[$t]);
 			$path = $database_schema_name . "." . $table_name;
 			
-			$text = $text . "<tr><td><a href='client.php?mode=" . $path . "'>" . $table_name . "</a></tr>";
+			$file = file($GLOBALS['databases_root'] . "/" . $components[0] . "/" . $components[1] . "/" . $tables[$t]);
+			$records = count($file);
+			
+			$text = $text . "<tr><td><a href='client.php?mode=" . $path . "'>" . $table_name . "</a> (" . $records . ")</tr>";
 		}
 			
 		$text = $text . "</table>";
@@ -243,6 +261,14 @@ function displayTables($database_schema_name) {
 	} else {
 		$text = "There are no tables in this database. Create using: create table [table_name] in [schema_name].[database_name]";
 	}
+
+	$text = $text . "<p><strong>Create Table</strong><P>";
+	$text = $text . "<form id='create_table' method='post' action='client.php'>
+				<input id='table_name' type='text' name='create_table_command' size='30'></input>
+				<input type='hidden' name='schema_name' value='" . $components[0] . "'></input>
+				<input type='hidden' name='database_name' value='" . $components[1] . "'></input>
+				<input name='button' type='submit' value='Create'/> 
+			</form>";
 	
 	$text = $text . "<p><a href='client.php?mode=" . $components[0] . "'>Back</a>";
 	
@@ -255,21 +281,9 @@ function displayTableContents($table_name) {
 	$components = explode(".", $table_name);
 	$file = $GLOBALS['databases_root'] . "/" . $components[0] . "/" . $components[1] . "/" . $components[2] . ".txt";
 	
+	# Handle Data Import
 	if (isset($_GET['import'])) {
-		
-		# Import datafile
-		
-		# Get filename
-		$filename = $components[2] . ".txt";
-		
-		# Delete existing file
-		unlink($file);
-		
-		# Copy data file
-		$source = $GLOBALS['datafiles_root'] . "/" . $_GET['import'] . ".txt";
-		$target = $file;
-		copy($source, $target);
-
+		importData($components[2], $file, $_GET['import']);
 	}
 	
 	# View File Contents
@@ -517,6 +531,24 @@ function deleteTable($table_name, $database_name, $schema_name) {
 function listContentsTable($table_name, $database_name, $schema_name) {
 	
 	
+	
+}
+
+function importData($target_filename, $existing_file, $source_file) {
+	
+	# target_filename = target table name without extension
+	# existing_file = full path, including filename
+	# source_file = source filename without extension
+	
+	# Import datafile
+	
+	# Delete existing file
+	unlink($existing_file);
+	
+	# Copy data file
+	$source = $GLOBALS['datafiles_root'] . "/" . $source_file . ".txt";
+
+	copy($source, $existing_file);
 	
 }
 
