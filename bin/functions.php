@@ -133,6 +133,18 @@ function delete($query) {
 			}
 			
 		}
+
+		# Delete Table | delete table <table_name> from <schema_name>.<database_name>
+		if ($commands[1] == "table") {
+			if ($elements == 5 && $commands[3] == "from") {
+				$database_schema = explode(".", $commands[4]);
+				$status = deleteTable($commands[2], $database_schema[1], $database_schema[0]);
+				echo "<p>Delete Table: " . $status;
+			} else {
+				echo "<p>Delete Table: ERROR: Missing parameters, or command malformed.";
+			}
+			
+		}
 		
 	} else {
 		echo "<p>Invalid: Specify schema, database or table.";
@@ -178,9 +190,11 @@ function displaySchemas() {
 	
 	if ($folders > 0) {
 		$text = "<table cellspacing=1 cellpadding=3 border=1>";
-		$text = $text . "<tr><td>Schemas</tr>";
+		$text = $text . "<tr><td colspan=2 align=left>Schemas</tr>";
 		for ($f = 3; $f < $folders; $f++) {
-			$text = $text . "<tr><td valign=top><a href='client.php?mode=" . $schemas[$f] . "'>" . $schemas[$f] . "</a></tr>";
+			$text = $text . "<tr><td valign=top width=200px><a href='client.php?mode=" . $schemas[$f] . "'>" . $schemas[$f] . "</a>";
+			$text = $text . "<td><a href='client.php?delete=schema." . $schemas[$f] . "' alt='Delete Schema'>Delete</a>";
+			$text = $text . "</tr>";
 		}
 		$text = $text . "</table>";
 	} else {
@@ -211,7 +225,9 @@ function displayDatabases($schema_name) {
 		$text = $text . "<table cellspacing=1 cellpadding=3 border=1 width=200px>";
 		
 		for ($d = 2; $d < $db_count; $d++) {
-			$text = $text . "<td valign=top width=100px><a href='client.php?mode=" . $schema_name . "." . $databases[$d] . "'>" . $databases[$d] . "</a></tr>";
+			$text = $text . "<td valign=top width=200px><a href='client.php?mode=" . $schema_name . "." . $databases[$d] . "'>" . $databases[$d] . "</a>";
+			$text = $text . "<td><a href='client.php?delete=database." . $schema_name . "." . $databases[$d] . "' alt='Delete Database'>Delete</a>";
+			$text = $text . "</tr>";
 		}
 		$text = $text . "</table>";
 	
@@ -386,21 +402,9 @@ function createSchema($schema_name) {
 	
 }
 
-function backupSchema($schema_name) {
-	
-	$schema_path = $GLOBALS['databases_root'] . "/" . $schema_name;
-	$status = "";
-	
-	# Check for only ASCII alphanumerics
-	$status = checkName($schema_name);	
-	
-	
-	
-}
-
 function deleteSchema($schema_name) {
 
-	$schema_path = "../db/" . $schema_name;
+	$schema_path = $GLOBALS['databases_root'] . "/" . $schema_name;
 	$status = "";
 	
 	# Check for only ASCII alphanumerics
@@ -409,8 +413,14 @@ function deleteSchema($schema_name) {
 	if ($status == "") { # Characters in schema name are fine
 	
 		if (file_exists($schema_path)) {
-			rmdir($schema_path);		
-			$status = "Schema deleted.<br/>";
+		
+			if (isDirectoryEmpty($schema_path) == 1) {
+				rmdir($schema_path);		
+				$status = "Schema deleted.<br/>";
+			} else {
+				$status = "ERROR: Cannot delete schema '" . $schema_name . "'; schema is not empty.<br/>";
+			}
+
 		} else {
 			$status = "ERROR: Schema does not exist.<br/>";
 		}
@@ -464,8 +474,14 @@ function deleteDatabase($database_name, $schema_name) {
 	if ($status == "") { # Characters in schema name are fine
 	
 		if (file_exists($database_path)) {
-			rmdir($database_path);		
-			$status = "Database deleted.<br/>";
+			
+			if (isDirectoryEmpty($database_path) == 1) {
+				rmdir($database_path);		
+				$status = "Database deleted.<br/>";
+			} else {
+				$status = "ERROR: Cannot delete database '" . $database_name . "'; database is not empty.<br/>";
+			}	
+	
 		} else {
 			$status = "ERROR: Database does not exist.<br/>";
 		}
@@ -476,12 +492,6 @@ function deleteDatabase($database_name, $schema_name) {
 	
 }
 
-function listDatabase($schema_name) {
-	
-	
-	
-	
-}
 
 # -------------------------------------------------------------------------------------------------------
 #										T A B L E   F U N C T I O N S
@@ -522,16 +532,29 @@ function createTable($table_name, $schema_database_name) {
 }
 
 function deleteTable($table_name, $database_name, $schema_name) {
-	
-	
-	
-	
-}
 
-function listContentsTable($table_name, $database_name, $schema_name) {
+	$table_path = $GLOBALS['databases_root'] . "/" . $schema_name . "/" . $database_name . "/" . $table_name . ".txt";
+	$status = "";
 	
+	# Check for only ASCII alphanumerics
+	$status = checkName($schema_name);
+	$status = checkName($database_name);
+	$status = checkName($table_name);
 	
+	if ($status == "") { # Characters in names are fine
 	
+		if (file_exists($table_path)) {
+			rmdir($table_path);		
+			$status = "Table deleted.<br/>";
+	
+		} else {
+			$status = "ERROR: Table does not exist.<br/>";
+		}
+
+	}
+		
+	return $status;	
+
 }
 
 function importData($target_filename, $existing_file, $source_file) {
@@ -595,6 +618,18 @@ function checkName($name) {
 		} else {
 			$status = "ERROR: Only alpha characters between a-z accepted.<br/>";
 		}
+	}
+	
+	return $status;
+	
+}
+
+function isDirectoryEmpty($directory_name) {
+	
+	if (count(scandir($directory_name)) > 2) {
+		$status = 0; # Directory not empty
+	} else {
+		$status = 1; # Directory empty
 	}
 	
 	return $status;

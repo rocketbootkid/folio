@@ -11,9 +11,7 @@
 	<form id="query" method="post" action="client.php">
 		<input id="query" type="text" name="query" size="100"></input>
 		<input name="button" type="submit"value="Query"/> 
-	</form>	
-
-<hr/>
+	</form>
 	
 <?php
 
@@ -28,10 +26,21 @@
 		
 		parseQuery($query);
 		
+		echo "<hr/>";
+		
 	}
-
 	
-	echo "<hr/>";
+	# Handle Delete commands
+	if (isset($_GET['delete'])) {
+		$commands = explode(".", $_GET['delete']);
+		if ($commands[0] == "schema") {
+			echo deleteSchema($commands[1]) . "<p>";
+		}
+		if ($commands[0] == "database") {
+			echo deleteDatabase($commands[2], $commands[1]) . "<p>";
+		}
+	}
+	
 	
 	# Handle Create commands
 	if (isset($_POST['create_schema_command'])) {
